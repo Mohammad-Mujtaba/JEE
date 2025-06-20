@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Links</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        
+        .link-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        a {
+            display: inline-block;
+            padding: 15px 30px;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            font-size: 18px;
+            text-transform: capitalize;
+            letter-spacing: 1px;
+        }
+        
+        a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.4s ease;
+        }
+        
+        a:hover::before {
+            left: 100%;
+        }
+        
+        a:nth-child(1) {
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+        }
+        
+        a:nth-child(2) {
+            background: linear-gradient(45deg, #a18cd1 0%, #fbc2eb 100%);
+        }
+        
+        a:nth-child(3) {
+            background: linear-gradient(45deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        
+        a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        a:active {
+            transform: translateY(1px);
+        }
+        
+        .subject-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Explore Science Subjects</h1>
+        <div class="link-container">
+            <a href="chemistry/periodic v2.html" class="subject-link">
+                <span class="subject-icon">🧪</span> Chemistry
+            </a>
+            <a href="physics/" class="subject-link">
+                <span class="subject-icon">⚛️</span> Physics
+            </a>
+            <a href="maths/trignometry table.html" class="subject-link">
+                <span class="subject-icon">🧮</span> Maths
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('.subject-link');
+            
+            // Add ripple effect to links
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Create ripple element
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    
+                    // Get click position
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    
+                    // Position the ripple
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    // Add animation
+                    ripple.style.animation = 'ripple-effect 0.6s linear';
+                    
+                    // Remove ripple after animation
+                    ripple.addEventListener('animationend', () => {
+                        ripple.remove();
+                        // Navigate after animation completes
+                        window.location.href = e.target.closest('a').href;
+                    });
+                });
+            });
+            
+            // Add style for ripple effect
+            const style = document.createElement('style');
+            style.textContent = `
+                .ripple {
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    background-color: rgba(255, 255, 255, 0.7);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    pointer-events: none;
+                }
+                
+                @keyframes ripple-effect {
+                    0% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(20);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
