@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Interactive Periodic Table</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 300;
+            font-size: 2.5rem;
+        }
+
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            grid-gap: 5px;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        .element {
+            position: relative;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        .element:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .element .number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .element .symbol {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .element .name {
+            font-size: 0.6rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            word-break: break-word;
+            padding: 0 2px;
+        }
+
+        .element:hover .name {
+            opacity: 1;
+        }
+
+        .element .details {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .element:hover .details {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .element .details h3 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .element .details p {
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+
+        /* Element category colors */
+        .alkali-metal { background-color: #FF9AA2; }
+        .alkaline-earth { background-color: #FFB7B2; }
+        .transition-metal { background-color: #FFDAC1; }
+        .post-transition-metal { background-color: #E2F0CB; }
+        .metalloid { background-color: #B5EAD7; }
+        .nonmetal { background-color: #C7CEEA; }
+        .halogen { background-color: #A2D7D8; }
+        .noble-gas { background-color: #BDE0FE; }
+        .lanthanide { background-color: #CDB4DB; }
+        .actinide { background-color: #FFC8DD; }
+        .unknown { background-color: #e0e0e0; }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .periodic-table {
+                grid-template-columns: repeat(9, 1fr);
+            }
+            
+            .element {
+                height: 60px;
+            }
+            
+            .element .symbol {
+                font-size: 1.2rem;
+            }
+            
+            .element .name {
+                font-size: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .periodic-table {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .element {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Modern Interactive Periodic Table</h1>
+        
+        <div class="periodic-table" id="periodicTable">
+            <!-- Elements will be inserted here by JavaScript -->
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color alkali-metal"></div>
+                <span>Alkali Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color alkaline-earth"></div>
+                <span>Alkaline Earth</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color transition-metal"></div>
+                <span>Transition Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color post-transition-metal"></div>
+                <span>Post-Transition Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color metalloid"></div>
+                <span>Metalloid</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color nonmetal"></div>
+                <span>Nonmetal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color halogen"></div>
+                <span>Halogen</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color noble-gas"></div>
+                <span>Noble Gas</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color lanthanide"></div>
+                <span>Lanthanide</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color actinide"></div>
+                <span>Actinide</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodicTable = document.getElementById('periodicTable');
+            
+            // Periodic table data
+            const elements = [
+                // Row 1
+                { number: 1, symbol: 'H', name: 'Hydrogen', group: 1, period: 1, family: 'Nonmetal', block: 's', category: 'nonmetal' },
+                { number: 2, symbol: 'He', name: 'Helium', group: 18, period: 1, family: 'Noble Gas', block: 's', category: 'noble-gas' },
+                
+                // Row 2
+                { number: 3, symbol: 'Li', name: 'Lithium', group: 1, period: 2, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 4, symbol: 'Be', name: 'Beryllium', group: 2, period: 2, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 5, symbol: 'B', name: 'Boron', group: 13, period: 2, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 6, symbol: 'C', name: 'Carbon', group: 14, period: 2, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 7, symbol: 'N', name: 'Nitrogen', group: 15, period: 2, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 8, symbol: 'O', name: 'Oxygen', group: 16, period: 2, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 9, symbol: 'F', name: 'Fluorine', group: 17, period: 2, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 10, symbol: 'Ne', name: 'Neon', group: 18, period: 2, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Row 3
+                { number: 11, symbol: 'Na', name: 'Sodium', group: 1, period: 3, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 12, symbol: 'Mg', name: 'Magnesium', group: 2, period: 3, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 13, symbol: 'Al', name: 'Aluminum', group: 13, period: 3, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 14, symbol: 'Si', name: 'Silicon', group: 14, period: 3, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 15, symbol: 'P', name: 'Phosphorus', group: 15, period: 3, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 16, symbol: 'S', name: 'Sulfur', group: 16, period: 3, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 17, symbol: 'Cl', name: 'Chlorine', group: 17, period: 3, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 18, symbol: 'Ar', name: 'Argon', group: 18, period: 3, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Row 4
+                { number: 19, symbol: 'K', name: 'Potassium', group: 1, period: 4, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 20, symbol: 'Ca', name: 'Calcium', group: 2, period: 4, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 21, symbol: 'Sc', name: 'Scandium', group: 3, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 22, symbol: 'Ti', name: 'Titanium', group: 4, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 23, symbol: 'V', name: 'Vanadium', group: 5, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 24, symbol: 'Cr', name: 'Chromium', group: 6, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 25, symbol: 'Mn', name: 'Manganese', group: 7, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 26, symbol: 'Fe', name: 'Iron', group: 8, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 27, symbol: 'Co', name: 'Cobalt', group: 9, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 28, symbol: 'Ni', name: 'Nickel', group: 10, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 29, symbol: 'Cu', name: 'Copper', group: 11, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 30, symbol: 'Zn', name: 'Zinc', group: 12, period: 4, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 31, symbol: 'Ga', name: 'Gallium', group: 13, period: 4, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 32, symbol: 'Ge', name: 'Germanium', group: 14, period: 4, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 33, symbol: 'As', name: 'Arsenic', group: 15, period: 4, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 34, symbol: 'Se', name: 'Selenium', group: 16, period: 4, family: 'Nonmetal', block: 'p', category: 'nonmetal' },
+                { number: 35, symbol: 'Br', name: 'Bromine', group: 17, period: 4, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 36, symbol: 'Kr', name: 'Krypton', group: 18, period: 4, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Row 5
+                { number: 37, symbol: 'Rb', name: 'Rubidium', group: 1, period: 5, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 38, symbol: 'Sr', name: 'Strontium', group: 2, period: 5, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 39, symbol: 'Y', name: 'Yttrium', group: 3, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 40, symbol: 'Zr', name: 'Zirconium', group: 4, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 41, symbol: 'Nb', name: 'Niobium', group: 5, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 42, symbol: 'Mo', name: 'Molybdenum', group: 6, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 43, symbol: 'Tc', name: 'Technetium', group: 7, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 44, symbol: 'Ru', name: 'Ruthenium', group: 8, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 45, symbol: 'Rh', name: 'Rhodium', group: 9, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 46, symbol: 'Pd', name: 'Palladium', group: 10, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 47, symbol: 'Ag', name: 'Silver', group: 11, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 48, symbol: 'Cd', name: 'Cadmium', group: 12, period: 5, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 49, symbol: 'In', name: 'Indium', group: 13, period: 5, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 50, symbol: 'Sn', name: 'Tin', group: 14, period: 5, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 51, symbol: 'Sb', name: 'Antimony', group: 15, period: 5, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 52, symbol: 'Te', name: 'Tellurium', group: 16, period: 5, family: 'Metalloid', block: 'p', category: 'metalloid' },
+                { number: 53, symbol: 'I', name: 'Iodine', group: 17, period: 5, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 54, symbol: 'Xe', name: 'Xenon', group: 18, period: 5, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Row 6
+                { number: 55, symbol: 'Cs', name: 'Cesium', group: 1, period: 6, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 56, symbol: 'Ba', name: 'Barium', group: 2, period: 6, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 57, symbol: 'La', name: 'Lanthanum', group: 3, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 72, symbol: 'Hf', name: 'Hafnium', group: 4, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 73, symbol: 'Ta', name: 'Tantalum', group: 5, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 74, symbol: 'W', name: 'Tungsten', group: 6, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 75, symbol: 'Re', name: 'Rhenium', group: 7, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 76, symbol: 'Os', name: 'Osmium', group: 8, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 77, symbol: 'Ir', name: 'Iridium', group: 9, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 78, symbol: 'Pt', name: 'Platinum', group: 10, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 79, symbol: 'Au', name: 'Gold', group: 11, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 80, symbol: 'Hg', name: 'Mercury', group: 12, period: 6, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 81, symbol: 'Tl', name: 'Thallium', group: 13, period: 6, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 82, symbol: 'Pb', name: 'Lead', group: 14, period: 6, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 83, symbol: 'Bi', name: 'Bismuth', group: 15, period: 6, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 84, symbol: 'Po', name: 'Polonium', group: 16, period: 6, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 85, symbol: 'At', name: 'Astatine', group: 17, period: 6, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 86, symbol: 'Rn', name: 'Radon', group: 18, period: 6, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Row 7
+                { number: 87, symbol: 'Fr', name: 'Francium', group: 1, period: 7, family: 'Alkali Metal', block: 's', category: 'alkali-metal' },
+                { number: 88, symbol: 'Ra', name: 'Radium', group: 2, period: 7, family: 'Alkaline Earth', block: 's', category: 'alkaline-earth' },
+                { number: 89, symbol: 'Ac', name: 'Actinium', group: 3, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 104, symbol: 'Rf', name: 'Rutherfordium', group: 4, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 105, symbol: 'Db', name: 'Dubnium', group: 5, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 106, symbol: 'Sg', name: 'Seaborgium', group: 6, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 107, symbol: 'Bh', name: 'Bohrium', group: 7, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 108, symbol: 'Hs', name: 'Hassium', group: 8, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 109, symbol: 'Mt', name: 'Meitnerium', group: 9, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 110, symbol: 'Ds', name: 'Darmstadtium', group: 10, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 111, symbol: 'Rg', name: 'Roentgenium', group: 11, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 112, symbol: 'Cn', name: 'Copernicium', group: 12, period: 7, family: 'Transition Metal', block: 'd', category: 'transition-metal' },
+                { number: 113, symbol: 'Nh', name: 'Nihonium', group: 13, period: 7, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 114, symbol: 'Fl', name: 'Flerovium', group: 14, period: 7, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 115, symbol: 'Mc', name: 'Moscovium', group: 15, period: 7, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 116, symbol: 'Lv', name: 'Livermorium', group: 16, period: 7, family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal' },
+                { number: 117, symbol: 'Ts', name: 'Tennessine', group: 17, period: 7, family: 'Halogen', block: 'p', category: 'halogen' },
+                { number: 118, symbol: 'Og', name: 'Oganesson', group: 18, period: 7, family: 'Noble Gas', block: 'p', category: 'noble-gas' },
+                
+                // Lanthanides
+                { number: 58, symbol: 'Ce', name: 'Cerium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 59, symbol: 'Pr', name: 'Praseodymium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 60, symbol: 'Nd', name: 'Neodymium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 61, symbol: 'Pm', name: 'Promethium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 62, symbol: 'Sm', name: 'Samarium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 63, symbol: 'Eu', name: 'Europium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 64, symbol: 'Gd', name: 'Gadolinium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 65, symbol: 'Tb', name: 'Terbium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 66, symbol: 'Dy', name: 'Dysprosium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 67, symbol: 'Ho', name: 'Holmium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 68, symbol: 'Er', name: 'Erbium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 69, symbol: 'Tm', name: 'Thulium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 70, symbol: 'Yb', name: 'Ytterbium', group: null, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                { number: 71, symbol: 'Lu', name: 'Lutetium', group: 3, period: 6, family: 'Lanthanide', block: 'f', category: 'lanthanide' },
+                
+                // Actinides
+                { number: 90, symbol: 'Th', name: 'Thorium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 91, symbol: 'Pa', name: 'Protactinium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 92, symbol: 'U', name: 'Uranium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 93, symbol: 'Np', name: 'Neptunium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 94, symbol: 'Pu', name: 'Plutonium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 95, symbol: 'Am', name: 'Americium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 96, symbol: 'Cm', name: 'Curium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 97, symbol: 'Bk', name: 'Berkelium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 98, symbol: 'Cf', name: 'Californium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 99, symbol: 'Es', name: 'Einsteinium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 100, symbol: 'Fm', name: 'Fermium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 101, symbol: 'Md', name: 'Mendelevium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 102, symbol: 'No', name: 'Nobelium', group: null, period: 7, family: 'Actinide', block: 'f', category: 'actinide' },
+                { number: 103, symbol: 'Lr', name: 'Lawrencium', group: 3, period: 7, family: 'Actinide', block: 'f', category: 'actinide' }
+            ];
+
+            // Create empty grid cells first
+            for (let i = 0; i < 18 * 7; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'empty-cell';
+                periodicTable.appendChild(cell);
+            }
+
+            // Place elements in their correct positions
+            elements.forEach(element => {
+                // Calculate position based on group and period
+                let position;
+                
+                if (element.number >= 58 && element.number <= 71) {
+                    // Lanthanides - place in row 8
+                    position = (7 * 18) + (element.number - 58) + 2;
+                } else if (element.number >= 90 && element.number <= 103) {
+                    // Actinides - place in row 9
+                    position = (8 * 18) + (element.number - 90) + 2;
+                } else {
+                    // Regular elements
+                    position = ((element.period - 1) * 18) + (element.group - 1);
+                }
+                
+                // Create element div
+                const elementDiv = document.createElement('div');
+                elementDiv.className = `element ${element.category}`;
+                elementDiv.innerHTML = `
+                    <div class="number">${element.number}</div>
+                    <div class="symbol">${element.symbol}</div>
+                    <div class="name">${element.name}</div>
+                    <div class="details">
+                        <h3>${element.name}</h3>
+                        <p><strong>Symbol:</strong> ${element.symbol}</p>
+                        <p><strong>Atomic Number:</strong> ${element.number}</p>
+                        <p><strong>Group:</strong> ${element.group || 'N/A'}</p>
+                        <p><strong>Period:</strong> ${element.period}</p>
+                        <p><strong>Family:</strong> ${element.family}</p>
+                        <p><strong>Block:</strong> ${element.block}</p>
+                    </div>
+                `;
+                
+                // Replace the empty cell at the calculated position
+                if (position < periodicTable.children.length) {
+                    periodicTable.replaceChild(elementDiv, periodicTable.children[position]);
+                } else {
+                    periodicTable.appendChild(elementDiv);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

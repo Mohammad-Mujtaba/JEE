@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Interactive Periodic Table</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --alkali-metal: #FF6B6B;
+            --alkaline-earth: #FFA07A;
+            --transition-metal: #FFD166;
+            --post-transition-metal: #06D6A0;
+            --metalloid: #4ECDC4;
+            --nonmetal: #118AB2;
+            --halogen: #7B2CBF;
+            --noble-gas: #3A86FF;
+            --lanthanide: #8338EC;
+            --actinide: #FF006E;
+            --unknown: #BDBDBD;
+            --text-dark: #2B2D42;
+            --text-light: #EDF2F4;
+            --bg-color: #F8F9FA;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --element-size: 80px;
+            --f-block-element-size: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background-color: #fff;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn.active {
+            background-color: var(--text-dark);
+            color: white;
+        }
+
+        .periodic-table-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            grid-gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .f-block-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .f-block {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-gap: 6px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .element {
+            position: relative;
+            width: var(--element-size);
+            height: var(--element-size);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            color: white;
+            background-color: var(--unknown);
+        }
+
+        .f-block .element {
+            width: var(--f-block-element-size);
+            height: var(--f-block-element-size);
+        }
+
+        .element:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .element .number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .element .symbol {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .f-block .element .symbol {
+            font-size: 1.4rem;
+        }
+
+        .element .name {
+            font-size: 0.6rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            word-break: break-word;
+            padding: 0 2px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .element:hover .name {
+            opacity: 1;
+        }
+
+        .element .details {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .element:hover .details {
+            opacity: 1;
+            pointer-events: auto;
+            top: calc(100% + 5px);
+        }
+
+        .element .details h3 {
+            margin-bottom: 8px;
+            color: inherit;
+            font-size: 1.2rem;
+            border-bottom: 2px solid currentColor;
+            padding-bottom: 5px;
+        }
+
+        .element .details p {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .element .details p span:last-child {
+            font-weight: 500;
+        }
+
+        /* Element category colors */
+        .alkali-metal { background-color: var(--alkali-metal); }
+        .alkaline-earth { background-color: var(--alkaline-earth); }
+        .transition-metal { background-color: var(--transition-metal); }
+        .post-transition-metal { background-color: var(--post-transition-metal); }
+        .metalloid { background-color: var(--metalloid); }
+        .nonmetal { background-color: var(--nonmetal); }
+        .halogen { background-color: var(--halogen); }
+        .noble-gas { background-color: var(--noble-gas); }
+        .lanthanide { background-color: var(--lanthanide); }
+        .actinide { background-color: var(--actinide); }
+        .unknown { background-color: var(--unknown); }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background-color: white;
+            box-shadow: var(--card-shadow);
+            font-size: 0.85rem;
+            transition: transform 0.2s ease;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+
+        /* Search and filter */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--noble-gas);
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+        }
+
+        /* Element info panel */
+        .info-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            padding: 25px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-panel.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .info-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .info-panel-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .info-panel-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.2s ease;
+        }
+
+        .info-panel-close:hover {
+            color: var(--text-dark);
+        }
+
+        .info-panel-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-panel-section {
+            margin-bottom: 15px;
+        }
+
+        .info-panel-section h4 {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .info-panel-section p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .info-panel-section ul {
+            padding-left: 20px;
+        }
+
+        .info-panel-section li {
+            margin-bottom: 5px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            :root {
+                --element-size: 70px;
+                --f-block-element-size: 60px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            :root {
+                --element-size: 60px;
+                --f-block-element-size: 50px;
+            }
+            
+            .element .symbol {
+                font-size: 1.4rem;
+            }
+            
+            .f-block .element .symbol {
+                font-size: 1.2rem;
+            }
+            
+            .f-block {
+                grid-template-columns: repeat(14, 1fr);
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --element-size: 50px;
+                --f-block-element-size: 45px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .element .symbol {
+                font-size: 1.2rem;
+            }
+            
+            .f-block .element .symbol {
+                font-size: 1rem;
+            }
+            
+            .f-block {
+                grid-template-columns: repeat(7, 1fr);
+                grid-gap: 5px;
+                padding: 0;
+            }
+            
+            .info-panel-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            :root {
+                --element-size: 40px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .element .symbol {
+                font-size: 1rem;
+            }
+            
+            .element .number {
+                font-size: 0.6rem;
+            }
+            
+            .main-table {
+                grid-gap: 4px;
+            }
+            
+            .f-block {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .controls {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .element {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        /* Atomic radius visualization */
+        .atomic-radius {
+            position: absolute;
+            bottom: 5px;
+            width: 60%;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .atomic-radius-fill {
+            height: 100%;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced Periodic Table</h1>
+            <p class="subtitle">Interactive visualization of the chemical elements</p>
+            
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Search elements by name or symbol...">
+            </div>
+            
+            <div class="controls">
+                <button class="btn active" data-filter="all">All Elements</button>
+                <button class="btn" data-filter="metal">Metals</button>
+                <button class="btn" data-filter="nonmetal">Nonmetals</button>
+                <button class="btn" data-filter="alkali">Alkali Metals</button>
+                <button class="btn" data-filter="noble">Noble Gases</button>
+                <button class="btn" data-filter="rare">Rare Earth</button>
+            </div>
+        </header>
+        
+        <div class="periodic-table-container">
+            <div class="main-table" id="periodicTable">
+                <!-- Main table elements will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="f-block-container">
+                <div class="f-block" id="fBlockTable">
+                    <!-- F-block elements will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color alkali-metal"></div>
+                <span>Alkali Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color alkaline-earth"></div>
+                <span>Alkaline Earth</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color transition-metal"></div>
+                <span>Transition Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color post-transition-metal"></div>
+                <span>Post-Transition Metal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color metalloid"></div>
+                <span>Metalloid</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color nonmetal"></div>
+                <span>Nonmetal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color halogen"></div>
+                <span>Halogen</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color noble-gas"></div>
+                <span>Noble Gas</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color lanthanide"></div>
+                <span>Lanthanide</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color actinide"></div>
+                <span>Actinide</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Element Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <div class="info-panel-header">
+            <h2 class="info-panel-title" id="infoPanelTitle">Element Name</h2>
+            <button class="info-panel-close" id="infoPanelClose">&times;</button>
+        </div>
+        <div class="info-panel-content" id="infoPanelContent">
+            <!-- Content will be filled by JavaScript -->
+        </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodicTable = document.getElementById('periodicTable');
+            const fBlockTable = document.getElementById('fBlockTable');
+            const searchBox = document.querySelector('.search-box');
+            const filterButtons = document.querySelectorAll('.btn[data-filter]');
+            const infoPanel = document.getElementById('infoPanel');
+            const infoPanelTitle = document.getElementById('infoPanelTitle');
+            const infoPanelContent = document.getElementById('infoPanelContent');
+            const infoPanelClose = document.getElementById('infoPanelClose');
+            const overlay = document.getElementById('overlay');
+            
+            // Extended periodic table data with additional properties
+            const elements = [
+                // Row 1
+                { 
+                    number: 1, symbol: 'H', name: 'Hydrogen', group: 1, period: 1, 
+                    family: 'Nonmetal', block: 's', category: 'nonmetal', 
+                    atomicMass: 1.008, state: 'Gas', density: 0.00008988,
+                    melt: 14.01, boil: 20.28, discovered: '1766',
+                    summary: 'Hydrogen is the lightest and most abundant element in the universe. It is colorless, odorless, and highly flammable.',
+                    uses: ['Fuel', 'Ammonia production', 'Petroleum refining']
+                },
+                { 
+                    number: 2, symbol: 'He', name: 'Helium', group: 18, period: 1, 
+                    family: 'Noble Gas', block: 's', category: 'noble-gas', 
+                    atomicMass: 4.0026, state: 'Gas', density: 0.0001785,
+                    melt: 0.95, boil: 4.22, discovered: '1868',
+                    summary: 'Helium is a colorless, odorless, inert monatomic gas that heads the noble gas group in the periodic table.',
+                    uses: ['Cryogenics', 'Airships', 'Welding']
+                },
+                
+                // Row 2
+                { 
+                    number: 3, symbol: 'Li', name: 'Lithium', group: 1, period: 2, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 6.94, state: 'Solid', density: 0.534,
+                    melt: 453.65, boil: 1603, discovered: '1817',
+                    summary: 'Lithium is a soft, silvery-white alkali metal. It is the lightest metal and the least dense solid element.',
+                    uses: ['Batteries', 'Medication', 'Alloys']
+                },
+                { 
+                    number: 4, symbol: 'Be', name: 'Beryllium', group: 2, period: 2, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 9.0122, state: 'Solid', density: 1.85,
+                    melt: 1560, boil: 2742, discovered: '1798',
+                    summary: 'Beryllium is a hard, grayish metal naturally found in mineral rocks. It has one of the highest melting points of the light metals.',
+                    uses: ['Aerospace', 'X-ray windows', 'Nuclear applications']
+                },
+                { 
+                    number: 5, symbol: 'B', name: 'Boron', group: 13, period: 2, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 10.81, state: 'Solid', density: 2.34,
+                    melt: 2349, boil: 4200, discovered: '1808',
+                    summary: 'Boron is a metalloid that exists in several allotropic forms. It is essential to plant growth and has many industrial applications.',
+                    uses: ['Fiberglass', 'Detergents', 'Semiconductors']
+                },
+                { 
+                    number: 6, symbol: 'C', name: 'Carbon', group: 14, period: 2, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 12.011, state: 'Solid', density: 2.267,
+                    melt: 3800, boil: 4300, discovered: 'Ancient',
+                    summary: 'Carbon is the basis for all known life and has exceptional properties that make it useful in many forms like diamond and graphite.',
+                    uses: ['Steel production', 'Jewelry', 'Fuel']
+                },
+                { 
+                    number: 7, symbol: 'N', name: 'Nitrogen', group: 15, period: 2, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 14.007, state: 'Gas', density: 0.0012506,
+                    melt: 63.15, boil: 77.36, discovered: '1772',
+                    summary: 'Nitrogen is a colorless, odorless diatomic gas that makes up about 78% of Earth\'s atmosphere.',
+                    uses: ['Fertilizers', 'Ammonia production', 'Preservation']
+                },
+                { 
+                    number: 8, symbol: 'O', name: 'Oxygen', group: 16, period: 2, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 15.999, state: 'Gas', density: 0.001429,
+                    melt: 54.36, boil: 90.2, discovered: '1774',
+                    summary: 'Oxygen is a highly reactive nonmetal that supports combustion and is essential for respiration in most living organisms.',
+                    uses: ['Respiration', 'Steel production', 'Medicine']
+                },
+                { 
+                    number: 9, symbol: 'F', name: 'Fluorine', group: 17, period: 2, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 18.998, state: 'Gas', density: 0.001696,
+                    melt: 53.53, boil: 85.03, discovered: '1886',
+                    summary: 'Fluorine is the most reactive and electronegative of all elements. It is a pale yellow diatomic gas at room temperature.',
+                    uses: ['Toothpaste', 'Refrigerants', 'Pharmaceuticals']
+                },
+                { 
+                    number: 10, symbol: 'Ne', name: 'Neon', group: 18, period: 2, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 20.180, state: 'Gas', density: 0.0008999,
+                    melt: 24.56, boil: 27.07, discovered: '1898',
+                    summary: 'Neon is a noble gas that gives a distinct reddish-orange glow when used in discharge tubes and neon lamps.',
+                    uses: ['Lighting', 'Lasers', 'Cryogenics']
+                },
+                
+                // Row 3
+                { 
+                    number: 11, symbol: 'Na', name: 'Sodium', group: 1, period: 3, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 22.990, state: 'Solid', density: 0.968,
+                    melt: 370.87, boil: 1156, discovered: '1807',
+                    summary: 'Sodium is a soft, silvery-white, highly reactive metal. It is an essential element for all animals and some plants.',
+                    uses: ['Table salt', 'Street lighting', 'Coolant']
+                },
+                { 
+                    number: 12, symbol: 'Mg', name: 'Magnesium', group: 2, period: 3, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 24.305, state: 'Solid', density: 1.738,
+                    melt: 923, boil: 1363, discovered: '1755',
+                    summary: 'Magnesium is a shiny gray solid that is the eighth most abundant element in Earth\'s crust and essential to all cells.',
+                    uses: ['Alloys', 'Fireworks', 'Medication']
+                },
+                { 
+                    number: 13, symbol: 'Al', name: 'Aluminum', group: 13, period: 3, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 26.982, state: 'Solid', density: 2.70,
+                    melt: 933.47, boil: 2792, discovered: '1825',
+                    summary: 'Aluminum is a silvery-white, soft, nonmagnetic, ductile metal. It is the third most abundant element in Earth\'s crust.',
+                    uses: ['Packaging', 'Construction', 'Transportation']
+                },
+                { 
+                    number: 14, symbol: 'Si', name: 'Silicon', group: 14, period: 3, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 28.085, state: 'Solid', density: 2.3296,
+                    melt: 1687, boil: 3538, discovered: '1824',
+                    summary: 'Silicon is a hard and brittle crystalline solid with a blue-gray metallic luster. It is essential to the electronics industry.',
+                    uses: ['Electronics', 'Solar cells', 'Construction']
+                },
+                { 
+                    number: 15, symbol: 'P', name: 'Phosphorus', group: 15, period: 3, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 30.974, state: 'Solid', density: 1.82,
+                    melt: 317.3, boil: 553.7, discovered: '1669',
+                    summary: 'Phosphorus exists in several allotropic forms and is essential for life. It is highly reactive and glows in the dark.',
+                    uses: ['Fertilizers', 'Detergents', 'Matches']
+                },
+                { 
+                    number: 16, symbol: 'S', name: 'Sulfur', group: 16, period: 3, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 32.06, state: 'Solid', density: 2.067,
+                    melt: 388.36, boil: 717.8, discovered: 'Ancient',
+                    summary: 'Sulfur is a bright yellow crystalline solid at room temperature. It is essential to all living cells.',
+                    uses: ['Fertilizers', 'Gunpowder', 'Rubber vulcanization']
+                },
+                { 
+                    number: 17, symbol: 'Cl', name: 'Chlorine', group: 17, period: 3, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 35.45, state: 'Gas', density: 0.003214,
+                    melt: 171.6, boil: 239.11, discovered: '1774',
+                    summary: 'Chlorine is a yellow-green gas at room temperature with a strong odor. It is used to keep swimming pools clean.',
+                    uses: ['Water purification', 'Disinfectants', 'PVC']
+                },
+                { 
+                    number: 18, symbol: 'Ar', name: 'Argon', group: 18, period: 3, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 39.948, state: 'Gas', density: 0.0017837,
+                    melt: 83.81, boil: 87.302, discovered: '1894',
+                    summary: 'Argon is a colorless, odorless, inert gas that is the third most abundant gas in Earth\'s atmosphere.',
+                    uses: ['Lighting', 'Welding', 'Preservation']
+                },
+                
+                // Row 4
+                { 
+                    number: 19, symbol: 'K', name: 'Potassium', group: 1, period: 4, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 39.098, state: 'Solid', density: 0.862,
+                    melt: 336.53, boil: 1032, discovered: '1807',
+                    summary: 'Potassium is a soft, silvery-white metal that reacts violently with water. It is essential for nerve function in animals.',
+                    uses: ['Fertilizers', 'Soap', 'Glass production']
+                },
+                { 
+                    number: 20, symbol: 'Ca', name: 'Calcium', group: 2, period: 4, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 40.078, state: 'Solid', density: 1.54,
+                    melt: 1115, boil: 1757, discovered: '1808',
+                    summary: 'Calcium is an alkaline earth metal that is essential for living organisms, particularly in cell physiology and bone formation.',
+                    uses: ['Construction', 'Dietary supplement', 'Cheese making']
+                },
+                { 
+                    number: 21, symbol: 'Sc', name: 'Scandium', group: 3, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 44.956, state: 'Solid', density: 2.985,
+                    melt: 1814, boil: 3109, discovered: '1879',
+                    summary: 'Scandium is a silvery-white metallic transition metal. It is often classified as a rare earth element.',
+                    uses: ['Aerospace', 'Sports equipment', 'Lighting']
+                },
+                { 
+                    number: 22, symbol: 'Ti', name: 'Titanium', group: 4, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 47.867, state: 'Solid', density: 4.506,
+                    melt: 1941, boil: 3560, discovered: '1791',
+                    summary: 'Titanium is a lustrous transition metal with a silver color, low density, and high strength.',
+                    uses: ['Aircraft', 'Medical implants', 'Jewelry']
+                },
+                { 
+                    number: 23, symbol: 'V', name: 'Vanadium', group: 5, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 50.942, state: 'Solid', density: 6.0,
+                    melt: 2183, boil: 3680, discovered: '1801',
+                    summary: 'Vanadium is a hard, silvery-gray, ductile transition metal. It is mainly used to produce specialty steel alloys.',
+                    uses: ['Steel alloys', 'Catalysts', 'Batteries']
+                },
+                { 
+                    number: 24, symbol: 'Cr', name: 'Chromium', group: 6, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 51.996, state: 'Solid', density: 7.15,
+                    melt: 2180, boil: 2944, discovered: '1797',
+                    summary: 'Chromium is a steely-gray, lustrous, hard metal that takes a high polish and has a high melting point.',
+                    uses: ['Stainless steel', 'Chrome plating', 'Pigments']
+                },
+                { 
+                    number: 25, symbol: 'Mn', name: 'Manganese', group: 7, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 54.938, state: 'Solid', density: 7.21,
+                    melt: 1519, boil: 2334, discovered: '1774',
+                    summary: 'Manganese is a gray-white metal resembling iron. It is hard and very brittle, and an essential trace element.',
+                    uses: ['Steel production', 'Batteries', 'Fertilizers']
+                },
+                { 
+                    number: 26, symbol: 'Fe', name: 'Iron', group: 8, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 55.845, state: 'Solid', density: 7.874,
+                    melt: 1811, boil: 3134, discovered: 'Ancient',
+                    summary: 'Iron is a metal in the first transition series. It is the most common element on Earth by mass, forming much of Earth\'s outer and inner core.',
+                    uses: ['Steel production', 'Construction', 'Magnets']
+                },
+                { 
+                    number: 27, symbol: 'Co', name: 'Cobalt', group: 9, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 58.933, state: 'Solid', density: 8.86,
+                    melt: 1768, boil: 3200, discovered: '1735',
+                    summary: 'Cobalt is a hard, lustrous, silver-gray metal. It is found in minerals and used to produce blue pigments and powerful magnets.',
+                    uses: ['Magnets', 'Batteries', 'Pigments']
+                },
+                { 
+                    number: 28, symbol: 'Ni', name: 'Nickel', group: 10, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 58.693, state: 'Solid', density: 8.912,
+                    melt: 1728, boil: 3186, discovered: '1751',
+                    summary: 'Nickel is a silvery-white lustrous metal with a slight golden tinge. It is hard and ductile.',
+                    uses: ['Stainless steel', 'Coins', 'Batteries']
+                },
+                { 
+                    number: 29, symbol: 'Cu', name: 'Copper', group: 11, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 63.546, state: 'Solid', density: 8.96,
+                    melt: 1357.77, boil: 2835, discovered: 'Ancient',
+                    summary: 'Copper is a soft, malleable, and ductile metal with very high thermal and electrical conductivity.',
+                    uses: ['Electrical wiring', 'Plumbing', 'Coins']
+                },
+                { 
+                    number: 30, symbol: 'Zn', name: 'Zinc', group: 12, period: 4, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 65.38, state: 'Solid', density: 7.134,
+                    melt: 692.68, boil: 1180, discovered: '1746',
+                    summary: 'Zinc is a slightly brittle metal at room temperature with a blue-silvery appearance when oxidation is removed.',
+                    uses: ['Galvanization', 'Batteries', 'Alloys']
+                },
+                { 
+                    number: 31, symbol: 'Ga', name: 'Gallium', group: 13, period: 4, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 69.723, state: 'Solid', density: 5.907,
+                    melt: 302.91, boil: 2477, discovered: '1875',
+                    summary: 'Gallium is a soft, silvery metal that melts near room temperature. It is used in semiconductors and LEDs.',
+                    uses: ['Semiconductors', 'LEDs', 'Thermometers']
+                },
+                { 
+                    number: 32, symbol: 'Ge', name: 'Germanium', group: 14, period: 4, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 72.630, state: 'Solid', density: 5.323,
+                    melt: 1211.4, boil: 3106, discovered: '1886',
+                    summary: 'Germanium is a lustrous, hard, grayish-white metalloid in the carbon group. It is an important semiconductor material.',
+                    uses: ['Fiber optics', 'Infrared optics', 'Transistors']
+                },
+                { 
+                    number: 33, symbol: 'As', name: 'Arsenic', group: 15, period: 4, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 74.922, state: 'Solid', density: 5.727,
+                    melt: 1090, boil: 887, discovered: 'Ancient',
+                    summary: 'Arsenic is a metalloid that occurs in many minerals. It has various allotropes and is notoriously poisonous.',
+                    uses: ['Pesticides', 'Semiconductors', 'Wood preservatives']
+                },
+                { 
+                    number: 34, symbol: 'Se', name: 'Selenium', group: 16, period: 4, 
+                    family: 'Nonmetal', block: 'p', category: 'nonmetal', 
+                    atomicMass: 78.971, state: 'Solid', density: 4.809,
+                    melt: 494, boil: 958, discovered: '1817',
+                    summary: 'Selenium is a nonmetal with properties intermediate between sulfur and tellurium. It is essential to many organisms.',
+                    uses: ['Glass production', 'Photocopiers', 'Dietary supplement']
+                },
+                { 
+                    number: 35, symbol: 'Br', name: 'Bromine', group: 17, period: 4, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 79.904, state: 'Liquid', density: 3.122,
+                    melt: 265.8, boil: 332.0, discovered: '1826',
+                    summary: 'Bromine is the only nonmetallic element that is liquid at room temperature. It is a reddish-brown volatile liquid.',
+                    uses: ['Flame retardants', 'Medication', 'Photography']
+                },
+                { 
+                    number: 36, symbol: 'Kr', name: 'Krypton', group: 18, period: 4, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 83.798, state: 'Gas', density: 0.003733,
+                    melt: 115.79, boil: 119.93, discovered: '1898',
+                    summary: 'Krypton is a colorless, odorless, tasteless noble gas that occurs in trace amounts in the atmosphere.',
+                    uses: ['Lighting', 'Lasers', 'Photography']
+                },
+                
+                // Row 5
+                { 
+                    number: 37, symbol: 'Rb', name: 'Rubidium', group: 1, period: 5, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 85.468, state: 'Solid', density: 1.532,
+                    melt: 312.46, boil: 961, discovered: '1861',
+                    summary: 'Rubidium is a soft, silvery-white metallic element of the alkali metal group. It is highly reactive and pyrophoric.',
+                    uses: ['Vacuum tubes', 'Atomic clocks', 'Fireworks']
+                },
+                { 
+                    number: 38, symbol: 'Sr', name: 'Strontium', group: 2, period: 5, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 87.62, state: 'Solid', density: 2.64,
+                    melt: 1050, boil: 1655, discovered: '1790',
+                    summary: 'Strontium is a soft silver-white yellowish metallic element. It has physical and chemical properties similar to calcium.',
+                    uses: ['Fireworks', 'Ferrite magnets', 'Toothpaste']
+                },
+                { 
+                    number: 39, symbol: 'Y', name: 'Yttrium', group: 3, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 88.906, state: 'Solid', density: 4.472,
+                    melt: 1799, boil: 3609, discovered: '1794',
+                    summary: 'Yttrium is a silvery-metallic transition metal chemically similar to the lanthanides and often classified as a rare earth element.',
+                    uses: ['LEDs', 'Superconductors', 'Cancer treatment']
+                },
+                { 
+                    number: 40, symbol: 'Zr', name: 'Zirconium', group: 4, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 91.224, state: 'Solid', density: 6.506,
+                    melt: 2128, boil: 4682, discovered: '1789',
+                    summary: 'Zirconium is a lustrous, gray-white, strong transition metal that resembles hafnium and titanium.',
+                    uses: ['Nuclear reactors', 'Ceramics', 'Surgical appliances']
+                },
+                { 
+                    number: 41, symbol: 'Nb', name: 'Niobium', group: 5, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 92.906, state: 'Solid', density: 8.57,
+                    melt: 2750, boil: 5017, discovered: '1801',
+                    summary: 'Niobium is a soft, gray, ductile transition metal. It is often found in the minerals pyrochlore and columbite.',
+                    uses: ['Superconducting magnets', 'Jet engines', 'Jewelry']
+                },
+                { 
+                    number: 42, symbol: 'Mo', name: 'Molybdenum', group: 6, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 95.95, state: 'Solid', density: 10.22,
+                    melt: 2896, boil: 4912, discovered: '1778',
+                    summary: 'Molybdenum is a silvery metal with one of the highest melting points of all pure elements.',
+                    uses: ['Alloys', 'Lubricants', 'Catalysts']
+                },
+                { 
+                    number: 43, symbol: 'Tc', name: 'Technetium', group: 7, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 98, state: 'Solid', density: 11,
+                    melt: 2430, boil: 4538, discovered: '1937',
+                    summary: 'Technetium is the lightest element whose isotopes are all radioactive. It is produced synthetically.',
+                    uses: ['Medical imaging', 'Corrosion prevention', 'Research']
+                },
+                { 
+                    number: 44, symbol: 'Ru', name: 'Ruthenium', group: 8, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 101.07, state: 'Solid', density: 12.45,
+                    melt: 2607, boil: 4423, discovered: '1844',
+                    summary: 'Ruthenium is a rare transition metal belonging to the platinum group. It is inert to most other chemicals.',
+                    uses: ['Electronics', 'Jewelry', 'Catalysts']
+                },
+                { 
+                    number: 45, symbol: 'Rh', name: 'Rhodium', group: 9, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 102.91, state: 'Solid', density: 12.41,
+                    melt: 2237, boil: 3968, discovered: '1803',
+                    summary: 'Rhodium is a rare, silvery-white, hard, corrosion-resistant transition metal. It is a noble metal.',
+                    uses: ['Catalytic converters', 'Jewelry', 'Electrical contacts']
+                },
+                { 
+                    number: 46, symbol: 'Pd', name: 'Palladium', group: 10, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 106.42, state: 'Solid', density: 12.02,
+                    melt: 1828.05, boil: 3236, discovered: '1803',
+                    summary: 'Palladium is a rare and lustrous silvery-white metal. It is the least dense and has the lowest melting point of the platinum group metals.',
+                    uses: ['Catalytic converters', 'Jewelry', 'Electronics']
+                },
+                { 
+                    number: 47, symbol: 'Ag', name: 'Silver', group: 11, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 107.87, state: 'Solid', density: 10.49,
+                    melt: 1234.93, boil: 2435, discovered: 'Ancient',
+                    summary: 'Silver is a soft, white, lustrous transition metal. It has the highest electrical conductivity of any element.',
+                    uses: ['Jewelry', 'Photography', 'Electronics']
+                },
+                { 
+                    number: 48, symbol: 'Cd', name: 'Cadmium', group: 12, period: 5, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 112.41, state: 'Solid', density: 8.65,
+                    melt: 594.22, boil: 1040, discovered: '1817',
+                    summary: 'Cadmium is a soft, bluish-white metal chemically similar to zinc and mercury. It is toxic and accumulates in organisms.',
+                    uses: ['Batteries', 'Pigments', 'Plating']
+                },
+                { 
+                    number: 49, symbol: 'In', name: 'Indium', group: 13, period: 5, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 114.82, state: 'Solid', density: 7.31,
+                    melt: 429.75, boil: 2345, discovered: '1863',
+                    summary: 'Indium is a post-transition metal that is very soft and malleable. It is chemically similar to gallium and thallium.',
+                    uses: ['LCD screens', 'Solders', 'Semiconductors']
+                },
+                { 
+                    number: 50, symbol: 'Sn', name: 'Tin', group: 14, period: 5, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 118.71, state: 'Solid', density: 7.265,
+                    melt: 505.08, boil: 2875, discovered: 'Ancient',
+                    summary: 'Tin is a silvery metal that is malleable and ductile. It resists corrosion and is used to plate other metals.',
+                    uses: ['Cans', 'Solder', 'Bronze']
+                },
+                { 
+                    number: 51, symbol: 'Sb', name: 'Antimony', group: 15, period: 5, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 121.76, state: 'Solid', density: 6.697,
+                    melt: 903.78, boil: 1860, discovered: 'Ancient',
+                    summary: 'Antimony is a lustrous gray metalloid. It is found in nature mainly as the sulfide mineral stibnite.',
+                    uses: ['Flame retardants', 'Alloys', 'Batteries']
+                },
+                { 
+                    number: 52, symbol: 'Te', name: 'Tellurium', group: 16, period: 5, 
+                    family: 'Metalloid', block: 'p', category: 'metalloid', 
+                    atomicMass: 127.60, state: 'Solid', density: 6.24,
+                    melt: 722.66, boil: 1261, discovered: '1782',
+                    summary: 'Tellurium is a brittle, mildly toxic, rare, silver-white metalloid. It is chemically related to selenium and sulfur.',
+                    uses: ['Solar panels', 'Alloys', 'Rubber']
+                },
+                { 
+                    number: 53, symbol: 'I', name: 'Iodine', group: 17, period: 5, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 126.90, state: 'Solid', density: 4.93,
+                    melt: 386.85, boil: 457.4, discovered: '1811',
+                    summary: 'Iodine is a lustrous purple-black nonmetal that sublimes readily to form a violet gas.',
+                    uses: ['Disinfectants', 'Dietary supplement', 'Photography']
+                },
+                { 
+                    number: 54, symbol: 'Xe', name: 'Xenon', group: 18, period: 5, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 131.29, state: 'Gas', density: 0.005887,
+                    melt: 161.4, boil: 165.03, discovered: '1898',
+                    summary: 'Xenon is a colorless, dense, odorless noble gas found in trace amounts in Earth\'s atmosphere.',
+                    uses: ['Lighting', 'Anesthesia', 'Spacecraft propulsion']
+                },
+                
+                // Row 6
+                { 
+                    number: 55, symbol: 'Cs', name: 'Cesium', group: 1, period: 6, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 132.91, state: 'Solid', density: 1.873,
+                    melt: 301.59, boil: 944, discovered: '1860',
+                    summary: 'Cesium is a soft, silvery-gold alkali metal with a melting point of 28.5°C, making it one of only five elemental metals liquid at room temperature.',
+                    uses: ['Atomic clocks', 'Drilling fluids', 'Photocells']
+                },
+                { 
+                    number: 56, symbol: 'Ba', name: 'Barium', group: 2, period: 6, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 137.33, state: 'Solid', density: 3.594,
+                    melt: 1000, boil: 2170, discovered: '1808',
+                    summary: 'Barium is a soft, silvery alkaline earth metal. It is never found in nature as a free element due to its high reactivity.',
+                    uses: ['Drilling fluids', 'X-ray imaging', 'Fireworks']
+                },
+                { 
+                    number: 57, symbol: 'La', name: 'Lanthanum', group: 3, period: 6, 
+                    family: 'Lanthanide', block: 'd', category: 'lanthanide', 
+                    atomicMass: 138.91, state: 'Solid', density: 6.145,
+                    melt: 1193, boil: 3737, discovered: '1839',
+                    summary: 'Lanthanum is a soft, ductile, silvery-white metal that tarnishes rapidly when exposed to air. It is the first element of the lanthanide series.',
+                    uses: ['Camera lenses', 'Batteries', 'Catalysts']
+                },
+                { 
+                    number: 72, symbol: 'Hf', name: 'Hafnium', group: 4, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 178.49, state: 'Solid', density: 13.31,
+                    melt: 2506, boil: 4876, discovered: '1923',
+                    summary: 'Hafnium is a lustrous, silvery gray, tetravalent transition metal. It is chemically similar to zirconium.',
+                    uses: ['Nuclear reactors', 'Microprocessors', 'Alloys']
+                },
+                { 
+                    number: 73, symbol: 'Ta', name: 'Tantalum', group: 5, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 180.95, state: 'Solid', density: 16.654,
+                    melt: 3290, boil: 5731, discovered: '1802',
+                    summary: 'Tantalum is a rare, hard, blue-gray, lustrous transition metal that is highly corrosion-resistant.',
+                    uses: ['Electronics', 'Surgical implants', 'Superalloys']
+                },
+                { 
+                    number: 74, symbol: 'W', name: 'Tungsten', group: 6, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 183.84, state: 'Solid', density: 19.25,
+                    melt: 3695, boil: 5828, discovered: '1783',
+                    summary: 'Tungsten is a rare metal found naturally on Earth combined with other elements. It has the highest melting point of all metals.',
+                    uses: ['Light bulb filaments', 'Armor-piercing ammunition', 'Alloys']
+                },
+                { 
+                    number: 75, symbol: 'Re', name: 'Rhenium', group: 7, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 186.21, state: 'Solid', density: 21.02,
+                    melt: 3459, boil: 5869, discovered: '1925',
+                    summary: 'Rhenium is a silvery-white, heavy, third-row transition metal with one of the highest melting points of all elements.',
+                    uses: ['Jet engines', 'Thermocouples', 'Catalysts']
+                },
+                { 
+                    number: 76, symbol: 'Os', name: 'Osmium', group: 8, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 190.23, state: 'Solid', density: 22.59,
+                    melt: 3306, boil: 5285, discovered: '1803',
+                    summary: 'Osmium is a hard, brittle, bluish-white transition metal in the platinum group. It is the densest naturally occurring element.',
+                    uses: ['Fountain pen tips', 'Electrical contacts', 'Alloys']
+                },
+                { 
+                    number: 77, symbol: 'Ir', name: 'Iridium', group: 9, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 192.22, state: 'Solid', density: 22.56,
+                    melt: 2719, boil: 4701, discovered: '1803',
+                    summary: 'Iridium is a very hard, brittle, silvery-white transition metal. It is the most corrosion-resistant metal known.',
+                    uses: ['Spark plugs', 'Crucibles', 'Pen tips']
+                },
+                { 
+                    number: 78, symbol: 'Pt', name: 'Platinum', group: 10, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 195.08, state: 'Solid', density: 21.45,
+                    melt: 2041.4, boil: 4098, discovered: '1735',
+                    summary: 'Platinum is a dense, malleable, ductile, highly unreactive, precious, silverish-white transition metal.',
+                    uses: ['Catalytic converters', 'Jewelry', 'Laboratory equipment']
+                },
+                { 
+                    number: 79, symbol: 'Au', name: 'Gold', group: 11, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 196.97, state: 'Solid', density: 19.3,
+                    melt: 1337.33, boil: 3129, discovered: 'Ancient',
+                    summary: 'Gold is a bright, slightly reddish yellow, dense, soft, malleable, and ductile metal. It is one of the least reactive chemical elements.',
+                    uses: ['Jewelry', 'Electronics', 'Currency']
+                },
+                { 
+                    number: 80, symbol: 'Hg', name: 'Mercury', group: 12, period: 6, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 200.59, state: 'Liquid', density: 13.534,
+                    melt: 234.32, boil: 629.88, discovered: 'Ancient',
+                    summary: 'Mercury is the only metallic element that is liquid at standard conditions. It is heavy and silvery-white.',
+                    uses: ['Thermometers', 'Barometers', 'Dental amalgams']
+                },
+                { 
+                    number: 81, symbol: 'Tl', name: 'Thallium', group: 13, period: 6, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 204.38, state: 'Solid', density: 11.85,
+                    melt: 577, boil: 1746, discovered: '1861',
+                    summary: 'Thallium is a soft gray post-transition metal that is highly toxic. It resembles tin but discolors when exposed to air.',
+                    uses: ['Electronics', 'Glass production', 'Rat poison']
+                },
+                { 
+                    number: 82, symbol: 'Pb', name: 'Lead', group: 14, period: 6, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 207.2, state: 'Solid', density: 11.34,
+                    melt: 600.61, boil: 2022, discovered: 'Ancient',
+                    summary: 'Lead is a heavy metal that is denser than most common materials. It is soft and malleable, and has a relatively low melting point.',
+                    uses: ['Batteries', 'Shielding', 'Construction']
+                },
+                { 
+                    number: 83, symbol: 'Bi', name: 'Bismuth', group: 15, period: 6, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 208.98, state: 'Solid', density: 9.78,
+                    melt: 544.7, boil: 1837, discovered: 'Ancient',
+                    summary: 'Bismuth is a brittle metal with a silvery white color when freshly produced, but surface oxidation gives it a pink tinge.',
+                    uses: ['Cosmetics', 'Medications', 'Fire sprinklers']
+                },
+                { 
+                    number: 84, symbol: 'Po', name: 'Polonium', group: 16, period: 6, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 209, state: 'Solid', density: 9.196,
+                    melt: 527, boil: 1235, discovered: '1898',
+                    summary: 'Polonium is a rare and highly radioactive metal with no stable isotopes. It is chemically similar to selenium and tellurium.',
+                    uses: ['Static eliminators', 'Heat sources', 'Nuclear weapons']
+                },
+                { 
+                    number: 85, symbol: 'At', name: 'Astatine', group: 17, period: 6, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 210, state: 'Solid', density: 7,
+                    melt: 575, boil: 610, discovered: '1940',
+                    summary: 'Astatine is a radioactive element and the heaviest known halogen. It is extremely rare in nature.',
+                    uses: ['Research', 'Cancer treatment', 'Radioactive tracer']
+                },
+                { 
+                    number: 86, symbol: 'Rn', name: 'Radon', group: 18, period: 6, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 222, state: 'Gas', density: 0.00973,
+                    melt: 202, boil: 211.5, discovered: '1900',
+                    summary: 'Radon is a radioactive, colorless, odorless, tasteless noble gas. It is the heaviest known gas and is considered a health hazard.',
+                    uses: ['Cancer treatment', 'Earthquake prediction', 'Research']
+                },
+                
+                // Row 7
+                { 
+                    number: 87, symbol: 'Fr', name: 'Francium', group: 1, period: 7, 
+                    family: 'Alkali Metal', block: 's', category: 'alkali-metal', 
+                    atomicMass: 223, state: 'Solid', density: 1.87,
+                    melt: 300, boil: 950, discovered: '1939',
+                    summary: 'Francium is an extremely radioactive metal that decays into astatine, radium, and radon. It is the second-least electronegative element.',
+                    uses: ['Research', 'No commercial uses']
+                },
+                { 
+                    number: 88, symbol: 'Ra', name: 'Radium', group: 2, period: 7, 
+                    family: 'Alkaline Earth', block: 's', category: 'alkaline-earth', 
+                    atomicMass: 226, state: 'Solid', density: 5.5,
+                    melt: 973, boil: 2010, discovered: '1898',
+                    summary: 'Radium is an almost pure-white alkaline earth metal, but it readily oxidizes on exposure to air, becoming black.',
+                    uses: ['Luminous paints', 'Medical applications', 'Research']
+                },
+                { 
+                    number: 89, symbol: 'Ac', name: 'Actinium', group: 3, period: 7, 
+                    family: 'Actinide', block: 'd', category: 'actinide', 
+                    atomicMass: 227, state: 'Solid', density: 10.07,
+                    melt: 1500, boil: 3500, discovered: '1899',
+                    summary: 'Actinium is a soft, silvery-white radioactive metal. It glows in the dark due to its intense radioactivity.',
+                    uses: ['Neutron sources', 'Radioactive tracer', 'Thermoelectric power']
+                },
+                { 
+                    number: 104, symbol: 'Rf', name: 'Rutherfordium', group: 4, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 267, state: 'Solid', density: 23.2,
+                    melt: 2400, boil: 5800, discovered: '1964',
+                    summary: 'Rutherfordium is a synthetic chemical element and is highly radioactive. It has no known biological role.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 105, symbol: 'Db', name: 'Dubnium', group: 5, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 268, state: 'Solid', density: 29.3,
+                    melt: null, boil: null, discovered: '1967',
+                    summary: 'Dubnium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of about 28 hours.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 106, symbol: 'Sg', name: 'Seaborgium', group: 6, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 269, state: 'Solid', density: 35.0,
+                    melt: null, boil: null, discovered: '1974',
+                    summary: 'Seaborgium is a synthetic element whose most stable isotope has a half-life of approximately 14 minutes.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 107, symbol: 'Bh', name: 'Bohrium', group: 7, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 270, state: 'Solid', density: 37.1,
+                    melt: null, boil: null, discovered: '1981',
+                    summary: 'Bohrium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 61 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 108, symbol: 'Hs', name: 'Hassium', group: 8, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 270, state: 'Solid', density: 40.7,
+                    melt: null, boil: null, discovered: '1984',
+                    summary: 'Hassium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 10 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 109, symbol: 'Mt', name: 'Meitnerium', group: 9, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 278, state: 'Solid', density: 37.4,
+                    melt: null, boil: null, discovered: '1982',
+                    summary: 'Meitnerium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 8 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 110, symbol: 'Ds', name: 'Darmstadtium', group: 10, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 281, state: 'Solid', density: 34.8,
+                    melt: null, boil: null, discovered: '1994',
+                    summary: 'Darmstadtium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 12.7 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 111, symbol: 'Rg', name: 'Roentgenium', group: 11, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 282, state: 'Solid', density: 28.7,
+                    melt: null, boil: null, discovered: '1994',
+                    summary: 'Roentgenium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 100 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 112, symbol: 'Cn', name: 'Copernicium', group: 12, period: 7, 
+                    family: 'Transition Metal', block: 'd', category: 'transition-metal', 
+                    atomicMass: 285, state: 'Gas', density: 23.7,
+                    melt: null, boil: null, discovered: '1996',
+                    summary: 'Copernicium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 29 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 113, symbol: 'Nh', name: 'Nihonium', group: 13, period: 7, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 286, state: 'Solid', density: 16,
+                    melt: null, boil: null, discovered: '2003',
+                    summary: 'Nihonium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 20 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 114, symbol: 'Fl', name: 'Flerovium', group: 14, period: 7, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 289, state: 'Gas', density: 14,
+                    melt: null, boil: null, discovered: '1998',
+                    summary: 'Flerovium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 2.6 seconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 115, symbol: 'Mc', name: 'Moscovium', group: 15, period: 7, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 290, state: 'Solid', density: 13.5,
+                    melt: null, boil: null, discovered: '2003',
+                    summary: 'Moscovium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 220 milliseconds.',
+                    uses: ['Scientific research only']
+                },
+                                { 
+                    number: 116, symbol: 'Lv', name: 'Livermorium', group: 16, period: 7, 
+                    family: 'Post-Transition Metal', block: 'p', category: 'post-transition-metal', 
+                    atomicMass: 293, state: 'Solid', density: 12.9,
+                    melt: null, boil: null, discovered: '2000',
+                    summary: 'Livermorium is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 53 milliseconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 117, symbol: 'Ts', name: 'Tennessine', group: 17, period: 7, 
+                    family: 'Halogen', block: 'p', category: 'halogen', 
+                    atomicMass: 294, state: 'Solid', density: 7.2,
+                    melt: null, boil: null, discovered: '2010',
+                    summary: 'Tennessine is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 51 milliseconds.',
+                    uses: ['Scientific research only']
+                },
+                { 
+                    number: 118, symbol: 'Og', name: 'Oganesson', group: 18, period: 7, 
+                    family: 'Noble Gas', block: 'p', category: 'noble-gas', 
+                    atomicMass: 294, state: 'Gas', density: 5.0,
+                    melt: null, boil: null, discovered: '2002',
+                    summary: 'Oganesson is a synthetic element that is highly radioactive. The most stable known isotope has a half-life of approximately 0.69 milliseconds.',
+                    uses: ['Scientific research only']
+                },
+                
+                // Lanthanides
+                { 
+                    number: 58, symbol: 'Ce', name: 'Cerium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 140.12, state: 'Solid', density: 6.770,
+                    melt: 1068, boil: 3716, discovered: '1803',
+                    summary: 'Cerium is a soft, ductile, silvery-white metallic element that tarnishes when exposed to air. It is the most abundant of the rare earth elements.',
+                    uses: ['Catalytic converters', 'Glass polishing', 'Flints']
+                },
+                { 
+                    number: 59, symbol: 'Pr', name: 'Praseodymium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 140.91, state: 'Solid', density: 6.773,
+                    melt: 1208, boil: 3793, discovered: '1885',
+                    summary: 'Praseodymium is a soft, silvery, malleable and ductile metal. It develops a green oxide coating when exposed to air.',
+                    uses: ['Aircraft engines', 'Studio lighting', 'Glass coloring']
+                },
+                { 
+                    number: 60, symbol: 'Nd', name: 'Neodymium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 144.24, state: 'Solid', density: 7.007,
+                    melt: 1297, boil: 3347, discovered: '1885',
+                    summary: 'Neodymium is a soft silvery metal that tarnishes in air. It is used to make powerful permanent magnets.',
+                    uses: ['Magnets', 'Lasers', 'Glass coloring']
+                },
+                { 
+                    number: 61, symbol: 'Pm', name: 'Promethium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 145, state: 'Solid', density: 7.26,
+                    melt: 1315, boil: 3273, discovered: '1945',
+                    summary: 'Promethium is a rare radioactive metal. All its isotopes are radioactive; it is extremely rare in nature.',
+                    uses: ['Nuclear batteries', 'Luminous paint', 'Thickness gauges']
+                },
+                { 
+                    number: 62, symbol: 'Sm', name: 'Samarium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 150.36, state: 'Solid', density: 7.52,
+                    melt: 1345, boil: 2067, discovered: '1879',
+                    summary: 'Samarium is a moderately hard silvery metal that readily oxidizes in air. It is used in permanent magnets.',
+                    uses: ['Magnets', 'Cancer treatment', 'Carbon arc lighting']
+                },
+                { 
+                    number: 63, symbol: 'Eu', name: 'Europium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 151.96, state: 'Solid', density: 5.244,
+                    melt: 1099, boil: 1802, discovered: '1901',
+                    summary: 'Europium is the most reactive rare earth element. It is a soft silvery metal that oxidizes quickly in air.',
+                    uses: ['Euro banknotes', 'Phosphors', 'Lasers']
+                },
+                { 
+                    number: 64, symbol: 'Gd', name: 'Gadolinium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 157.25, state: 'Solid', density: 7.895,
+                    melt: 1585, boil: 3546, discovered: '1880',
+                    summary: 'Gadolinium is a silvery-white metal when oxidation is removed. It has unusual metallurgical properties.',
+                    uses: ['MRI contrast agent', 'Neutron absorber', 'Magnets']
+                },
+                { 
+                    number: 65, symbol: 'Tb', name: 'Terbium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 158.93, state: 'Solid', density: 8.230,
+                    melt: 1629, boil: 3503, discovered: '1843',
+                    summary: 'Terbium is a silvery-white rare earth metal that is malleable, ductile and soft enough to be cut with a knife.',
+                    uses: ['Color TV tubes', 'Fluorescent lamps', 'Lasers']
+                },
+                { 
+                    number: 66, symbol: 'Dy', name: 'Dysprosium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 162.50, state: 'Solid', density: 8.540,
+                    melt: 1680, boil: 2840, discovered: '1886',
+                    summary: 'Dysprosium is a rare earth element with a metallic silver luster. It is relatively stable in air at room temperature.',
+                    uses: ['Neodymium magnets', 'Nuclear reactors', 'Data storage']
+                },
+                { 
+                    number: 67, symbol: 'Ho', name: 'Holmium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 164.93, state: 'Solid', density: 8.79,
+                    melt: 1734, boil: 2993, discovered: '1878',
+                    summary: 'Holmium is a relatively soft and malleable silvery-white metal. It is too reactive to be found uncombined in nature.',
+                    uses: ['Magnets', 'Colorants', 'Microwave equipment']
+                },
+                { 
+                    number: 68, symbol: 'Er', name: 'Erbium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 167.26, state: 'Solid', density: 9.066,
+                    melt: 1802, boil: 3141, discovered: '1842',
+                    summary: 'Erbium is a silvery-white solid metal when artificially isolated. It is malleable and soft enough to be cut with a knife.',
+                    uses: ['Fiber optics', 'Lasers', 'Nuclear technology']
+                },
+                { 
+                    number: 69, symbol: 'Tm', name: 'Thulium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 168.93, state: 'Solid', density: 9.32,
+                    melt: 1818, boil: 2223, discovered: '1879',
+                    summary: 'Thulium is the least abundant of the naturally occurring rare earth elements. It is a bright, silvery metal.',
+                    uses: ['Portable X-ray devices', 'Lasers', 'Euro banknotes']
+                },
+                { 
+                    number: 70, symbol: 'Yb', name: 'Ytterbium', group: null, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 173.05, state: 'Solid', density: 6.90,
+                    melt: 1097, boil: 1469, discovered: '1878',
+                    summary: 'Ytterbium is a soft, malleable and ductile chemical element that displays a bright silvery luster when pure.',
+                    uses: ['Stress gauges', 'Lasers', 'Atomic clocks']
+                },
+                { 
+                    number: 71, symbol: 'Lu', name: 'Lutetium', group: 3, period: 6, 
+                    family: 'Lanthanide', block: 'f', category: 'lanthanide', 
+                    atomicMass: 174.97, state: 'Solid', density: 9.841,
+                    melt: 1925, boil: 3675, discovered: '1907',
+                    summary: 'Lutetium is a silvery white metal, which resists corrosion in dry air, but not in moist air. It is the last element in the lanthanide series.',
+                    uses: ['PET scans', 'Cancer treatment', 'Catalysts']
+                },
+                
+                // Actinides
+                { 
+                    number: 90, symbol: 'Th', name: 'Thorium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 232.04, state: 'Solid', density: 11.7,
+                    melt: 2023, boil: 5061, discovered: '1829',
+                    summary: 'Thorium is a weakly radioactive metallic chemical element. When pure, it is a silvery white metal that retains its luster for several months.',
+                    uses: ['Nuclear fuel', 'Gas mantles', 'Alloys']
+                },
+                { 
+                    number: 91, symbol: 'Pa', name: 'Protactinium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 231.04, state: 'Solid', density: 15.37,
+                    melt: 1841, boil: 4300, discovered: '1913',
+                    summary: 'Protactinium is a dense, silvery-gray actinide metal which readily reacts with oxygen, water vapor and inorganic acids.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 92, symbol: 'U', name: 'Uranium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 238.03, state: 'Solid', density: 19.1,
+                    melt: 1405.3, boil: 4404, discovered: '1789',
+                    summary: 'Uranium is a silvery-white metal in the actinide series. It is weakly radioactive because all its isotopes are unstable.',
+                    uses: ['Nuclear fuel', 'Military applications', 'Counterweights']
+                },
+                { 
+                    number: 93, symbol: 'Np', name: 'Neptunium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 237, state: 'Solid', density: 20.45,
+                    melt: 917, boil: 4273, discovered: '1940',
+                    summary: 'Neptunium is a hard, silvery, ductile, radioactive actinide metal. It is the first transuranic element.',
+                    uses: ['Neutron detection', 'Scientific research']
+                },
+                { 
+                    number: 94, symbol: 'Pu', name: 'Plutonium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 244, state: 'Solid', density: 19.816,
+                    melt: 912.5, boil: 3501, discovered: '1940',
+                    summary: 'Plutonium is a radioactive actinide metal whose isotopes are used in nuclear weapons and as fuel in nuclear reactors.',
+                    uses: ['Nuclear weapons', 'Spacecraft power', 'Nuclear reactors']
+                },
+                { 
+                    number: 95, symbol: 'Am', name: 'Americium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 243, state: 'Solid', density: 12,
+                    melt: 1449, boil: 2880, discovered: '1944',
+                    summary: 'Americium is a radioactive transuranic chemical element. It is widely used in commercial ionization chamber smoke detectors.',
+                    uses: ['Smoke detectors', 'Neutron sources', 'Industrial gauges']
+                },
+                { 
+                    number: 96, symbol: 'Cm', name: 'Curium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 247, state: 'Solid', density: 13.51,
+                    melt: 1613, boil: 3383, discovered: '1944',
+                    summary: 'Curium is a hard, dense, silvery metal with a relatively high melting point for an actinide. It is highly radioactive.',
+                    uses: ['Spacecraft power', 'X-ray spectrometers', 'Scientific research']
+                },
+                { 
+                    number: 97, symbol: 'Bk', name: 'Berkelium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 247, state: 'Solid', density: 14.78,
+                    melt: 1259, boil: 2900, discovered: '1949',
+                    summary: 'Berkelium is a soft, silvery-white radioactive transuranic element. It is named after the city of Berkeley, California.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 98, symbol: 'Cf', name: 'Californium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 251, state: 'Solid', density: 15.1,
+                    melt: 1173, boil: 1743, discovered: '1950',
+                    summary: 'Californium is a radioactive metallic chemical element. It is an actinide element, the sixth transuranium element to be synthesized.',
+                    uses: ['Neutron sources', 'Cancer treatment', 'Moisture gauges']
+                },
+                { 
+                    number: 99, symbol: 'Es', name: 'Einsteinium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 252, state: 'Solid', density: 8.84,
+                    melt: 1133, boil: 1269, discovered: '1952',
+                    summary: 'Einsteinium is a synthetic element with the symbol Es and atomic number 99. It is the seventh transuranic element.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 100, symbol: 'Fm', name: 'Fermium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 257, state: 'Solid', density: 9.7,
+                    melt: 1800, boil: null, discovered: '1952',
+                    summary: 'Fermium is a synthetic element with the symbol Fm and atomic number 100. It is the eighth transuranic element.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 101, symbol: 'Md', name: 'Mendelevium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 258, state: 'Solid', density: 10.3,
+                    melt: 1100, boil: null, discovered: '1955',
+                    summary: 'Mendelevium is a synthetic element with the symbol Md and atomic number 101. It is a metallic radioactive transuranic element.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 102, symbol: 'No', name: 'Nobelium', group: null, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 259, state: 'Solid', density: 9.9,
+                    melt: 1100, boil: null, discovered: '1956',
+                    summary: 'Nobelium is a synthetic chemical element with the symbol No and atomic number 102. It is named in honor of Alfred Nobel.',
+                    uses: ['Scientific research', 'No commercial uses']
+                },
+                { 
+                    number: 103, symbol: 'Lr', name: 'Lawrencium', group: 3, period: 7, 
+                    family: 'Actinide', block: 'f', category: 'actinide', 
+                    atomicMass: 266, state: 'Solid', density: 15.6,
+                    melt: 1900, boil: null, discovered: '1961',
+                    summary: 'Lawrencium is a synthetic chemical element with the symbol Lr and atomic number 103. It is the last element in the actinide series.',
+                    uses: ['Scientific research', 'No commercial uses']
+                }
+            ];
+
+            // Create empty grid cells for main table
+            for (let i = 0; i < 18 * 7; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'empty-cell';
+                periodicTable.appendChild(cell);
+            }
+
+            // Create empty grid cells for f-block table
+            for (let i = 0; i < 15 * 2; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'empty-cell';
+                fBlockTable.appendChild(cell);
+            }
+
+            // Function to create element div
+            function createElementDiv(element) {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = `element ${element.category}`;
+                elementDiv.dataset.number = element.number;
+                elementDiv.dataset.category = element.category;
+                elementDiv.dataset.block = element.block;
+                elementDiv.dataset.name = element.name.toLowerCase();
+                elementDiv.dataset.symbol = element.symbol.toLowerCase();
+                
+                // Calculate relative atomic radius for visualization (0-100%)
+                const maxRadius = 265; // pm (atomic radius of largest element)
+                const radiusPercent = element.atomicMass ? Math.min(100, Math.round((element.atomicMass / maxRadius) * 100)) : 0;
+                
+                elementDiv.innerHTML = `
+                    <div class="number">${element.number}</div>
+                    <div class="symbol">${element.symbol}</div>
+                    <div class="name">${element.name}</div>
+                    <div class="atomic-radius"><div class="atomic-radius-fill" style="width: ${radiusPercent}%"></div></div>
+                    <div class="details">
+                        <h3>${element.name}</h3>
+                        <p><span>Symbol:</span> <span>${element.symbol}</span></p>
+                        <p><span>Atomic Number:</span> <span>${element.number}</span></p>
+                        <p><span>Atomic Mass:</span> <span>${element.atomicMass || 'Unknown'}</span></p>
+                        <p><span>Group:</span> <span>${element.group || 'N/A'}</span></p>
+                        <p><span>Period:</span> <span>${element.period}</span></p>
+                        <p><span>Family:</span> <span>${element.family}</span></p>
+                        <p><span>Block:</span> <span>${element.block}</span></p>
+                        <p><span>State at STP:</span> <span>${element.state}</span></p>
+                        <p><span>Discovered:</span> <span>${element.discovered}</span></p>
+                    </div>
+                `;
+                
+                // Add click event to show detailed info panel
+                elementDiv.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        showInfoPanel(element);
+                    }
+                });
+                
+                return elementDiv;
+            }
+
+            // Function to show detailed info panel
+            function showInfoPanel(element) {
+                infoPanelTitle.textContent = element.name;
+                
+                // Create info panel content
+                let contentHTML = `
+                    <div class="info-panel-section">
+                        <h4>Basic Information</h4>
+                        <p><strong>Symbol:</strong> ${element.symbol}</p>
+                        <p><strong>Atomic Number:</strong> ${element.number}</p>
+                        <p><strong>Atomic Mass:</strong> ${element.atomicMass || 'Unknown'}</p>
+                        <p><strong>Group:</strong> ${element.group || 'N/A'}</p>
+                        <p><strong>Period:</strong> ${element.period}</p>
+                        <p><strong>Family:</strong> ${element.family}</p>
+                        <p><strong>Block:</strong> ${element.block}</p>
+                        <p><strong>Category:</strong> ${element.category.replace('-', ' ')}</p>
+                    </div>
+                    
+                    <div class="info-panel-section">
+                        <h4>Physical Properties</h4>
+                        <p><strong>State at STP:</strong> ${element.state}</p>
+                        <p><strong>Density:</strong> ${element.density || 'Unknown'} g/cm³</p>
+                        <p><strong>Melting Point:</strong> ${element.melt ? element.melt + ' K' : 'Unknown'}</p>
+                        <p><strong>Boiling Point:</strong> ${element.boil ? element.boil + ' K' : 'Unknown'}</p>
+                    </div>
+                    
+                    <div class="info-panel-section">
+                        <h4>Discovery</h4>
+                        <p><strong>Year:</strong> ${element.discovered}</p>
+                    </div>
+                    
+                    <div class="info-panel-section">
+                        <h4>Summary</h4>
+                        <p>${element.summary}</p>
+                    </div>
+                `;
+                
+                if (element.uses && element.uses.length > 0) {
+                    contentHTML += `
+                        <div class="info-panel-section">
+                            <h4>Uses</h4>
+                            <ul>
+                                ${element.uses.map(use => `<li>${use}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                infoPanelContent.innerHTML = contentHTML;
+                infoPanel.classList.add('active');
+                overlay.classList.add('active');
+            }
+
+            // Close info panel
+            infoPanelClose.addEventListener('click', function() {
+                infoPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            overlay.addEventListener('click', function() {
+                infoPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Place elements in their correct positions
+            elements.forEach(element => {
+                const elementDiv = createElementDiv(element);
+                
+                if (element.block === 'f') {
+                    // Place f-block elements in the separate table
+                    let position;
+                    if (element.number >= 58 && element.number <= 71) {
+                        // Lanthanides - first row of f-block
+                        position = element.number - 58;
+                    } else if (element.number >= 90 && element.number <= 103) {
+                        // Actinides - second row of f-block
+                        position = 15 + (element.number - 90);
+                    }
+                    
+                    if (position !== undefined && position < fBlockTable.children.length) {
+                        fBlockTable.replaceChild(elementDiv, fBlockTable.children[position]);
+                    }
+                } else {
+                    // Place main table elements
+                    let position = ((element.period - 1) * 18) + (element.group - 1);
+                    
+                    // Handle special cases (La and Ac)
+                    if (element.number === 57 || element.number === 89) {
+                        position = ((element.period - 1) * 18) + 2;
+                    }
+                    
+                    // Replace the empty cell at the calculated position
+                    if (position < periodicTable.children.length) {
+                        periodicTable.replaceChild(elementDiv, periodicTable.children[position]);
+                    }
+                }
+            });
+
+            // Search functionality
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const elements = document.querySelectorAll('.element');
+                
+                elements.forEach(el => {
+                    const name = el.dataset.name;
+                    const symbol = el.dataset.symbol;
+                    const number = el.dataset.number;
+                    
+                    if (name.includes(searchTerm)) {
+                        el.style.display = 'flex';
+                    } else if (symbol.includes(searchTerm)) {
+                        el.style.display = 'flex';
+                    } else if (number.includes(searchTerm)) {
+                        el.style.display = 'flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                });
+            });
+
+            // Filter functionality
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    const elements = document.querySelectorAll('.element');
+                    
+                    elements.forEach(el => {
+                        const category = el.dataset.category;
+                        const block = el.dataset.block;
+                        
+                        switch(filter) {
+                            case 'all':
+                                el.style.display = 'flex';
+                                break;
+                            case 'metal':
+                                if (category.includes('metal') && !category.includes('nonmetal') && 
+                                    !category.includes('noble-gas') && !category.includes('halogen')) {
+                                    el.style.display = 'flex';
+                                } else {
+                                    el.style.display = 'none';
+                                }
+                                break;
+                            case 'nonmetal':
+                                if (category.includes('nonmetal') || category.includes('halogen') || 
+                                    category.includes('noble-gas')) {
+                                    el.style.display = 'flex';
+                                } else {
+                                    el.style.display = 'none';
+                                }
+                                break;
+                            case 'alkali':
+                                el.style.display = category === 'alkali-metal' ? 'flex' : 'none';
+                                break;
+                            case 'noble':
+                                el.style.display = category === 'noble-gas' ? 'flex' : 'none';
+                                break;
+                            case 'rare':
+                                el.style.display = (block === 'f' || category === 'lanthanide' || 
+                                                  category === 'actinide') ? 'flex' : 'none';
+                                break;
+                            default:
+                                el.style.display = 'flex';
+                        }
+                    });
+                });
+            });
+
+            // Add animation delays to elements for staggered appearance
+            const allElements = document.querySelectorAll('.element');
+            allElements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.02}s`;
+            });
+        });
+    </script>
+</body>
+</html>
